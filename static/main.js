@@ -78,10 +78,24 @@ function pageLoad() {
     state.setSelected(window.location.pathname.slice(1));
     loadList();
     document.querySelector("#title_bar").addEventListener("click", toggle_aside);
-    document.querySelector("#open_all_btn").addEventListener("click", openEverything);
-    document.querySelector("#close_all_btn").addEventListener("click", closeEverything);
+    document.querySelector("#open_all_btn").addEventListener("click", openAllFolders);
+    document.querySelector("#close_all_btn").addEventListener("click", closeAllFolders);
     document.querySelector("#copy_link_btn").addEventListener("click", copy_link);
     document.querySelector("#add_note_btn").addEventListener("click", new_note_dialog);
+    document.querySelector("#search_input").addEventListener("input", e => {
+        let term = e.target.value;
+        clearResults();
+        if (term != "") {
+            closeAllFolders();
+            search_note(term).forEach(result => reveal_note(result));
+        }
+    });
+    document.querySelector("#search_btn").addEventListener("click", clickFirstResult);
+    document.querySelector("#search_input").addEventListener("keydown", e => {
+        if (e.key == "Enter") {
+            clickFirstResult();
+        }
+    });
 }
 
 function loadList() {
@@ -98,7 +112,7 @@ function loadList() {
 
 
 // Function to open all folders
-function openEverything() {
+function openAllFolders() {
     state.clearOpened();
     document.querySelectorAll("#arbolist details").forEach(details => {
         details.open = true;
@@ -107,7 +121,7 @@ function openEverything() {
 }
 
 // Function to close all folders
-function closeEverything() {
+function closeAllFolders() {
     state.clearOpened();
     document.querySelectorAll("#arbolist details").forEach(details => {
         details.open = false;
@@ -158,6 +172,7 @@ function createFolder(name, data) {
 function note_link(note) {
     let li = document.createElement('li');
     li.innerText = note.title;
+    li.classList.add("note-link");
     li.setAttribute("id", note.id);
     if (note.id == state.getSelected()) {
         li.classList.add("selected");
@@ -185,4 +200,30 @@ function open_note(id) {
 
 function new_note_dialog() {
     console.log("new note");
+}
+
+// Function to search for a note
+function search_note(term) {
+    results = [];
+    document.querySelectorAll(".note-link").forEach(note => {
+        if (note.innerText.toLowerCase().includes(term.toLowerCase())) results.push(note);
+    });
+    return results;
+}
+
+function reveal_note(note) {
+    let folder = note.closest("details");
+    folder.open = true;
+    state.addOpened(folder.querySelector(".title").innerText);
+    note.classList.add("found");
+}
+
+function clearResults() {
+    document.querySelectorAll(".found").forEach(note => {
+        note.classList.remove("found");
+    });
+}
+
+function clickFirstResult() {
+    document.querySelectorAll(".found")[0].click();
 }
