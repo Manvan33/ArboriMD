@@ -15,7 +15,7 @@ class CodimdAPI:
     def logged_in_request(self, method, url, return_redirect=False):
         print(f"{method} - {url} - return redirect={return_redirect}")
         try:
-            result = self.session.request(method, url, allow_redirects=False)
+            result = self.session.request(method, url, allow_redirects=False, proxies={"http": "http://localhost:8080", "https": "http://localhost:8080"}, verify=False)
             print(result.status_code)
         except AttributeError:
             print("AttributeError")
