@@ -58,10 +58,28 @@ class State {
 
 let state = null;
 
+function toggle_aside() {
+    // Get the root element
+    var r = document.querySelector(':root');
+    if (r.style.getPropertyValue("--aside-width") == "0px") {
+        document.querySelector("#aside").classList.remove("hidden");
+        r.style.setProperty("--aside-width", "18vw");
+    } else {
+        document.querySelector("#aside").classList.add("hidden");
+        r.style.setProperty("--aside-width", "0px");
+    }
+}
+
 function pageLoad() {
     state = new State();
     state.setSelected(window.location.pathname.slice(1));
     loadList();
+    document.querySelector("#enable_btn").addEventListener("click", e => {
+        toggle_aside();
+    });
+    document.querySelector("#tree_btn").addEventListener("click", e => {
+        toggle_aside();
+    });
 }
 
 function loadList() {
@@ -78,9 +96,12 @@ function loadList() {
 }
 
 function createFolder(name, data) {
-    let folder = document.createElement('details');
-    let summary = document.createElement('summary');
-    summary.innerText = name;
+    // Clone the node
+    let folder = document.querySelector("#folder_template").cloneNode(true);
+    folder.removeAttribute("id");
+    let summary = folder.querySelector('summary');
+    let title = folder.querySelector(".title");
+    title.innerText = name;
     folder.appendChild(summary);
     summary.addEventListener("click", event => {
         if (folder.open) {
