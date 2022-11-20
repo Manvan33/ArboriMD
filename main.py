@@ -49,6 +49,9 @@ def list():
 def refresh(note_id):
     return codimd.refresh_note(note_id) and "OK" or (404, "ERROR")
 
+@app.route('/create')
+def create():
+    return codimd.create_note() or (404, "ERROR")
 
 def restructure_entry(entry): return {
     "id": entry["id"], "title": entry["text"], "timestamp": entry["time"]}

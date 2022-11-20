@@ -65,8 +65,19 @@
                 </svg>
             </div>
         </div>
+        <div id="add_note_dialog" class="hidden">
+            <h2>Adding a note<span class="right">x</span></h2>
+            <div class="flex column">
+                <!-- Form with no action, only javascript -->
+                <label for="add_note_url">Use an existing note</label>
+                <input type="text" id="add_note_url" value="" placeholder="Enter the note URL" />
+                <button type="button" id="add_note_url_btn">Add</button>
+                OR
+                <button id="create_new_btn">Create a new note</button>
+            </div>
+        </div>
         <div id="search_box" class="flex">
-            <input type="text" id="search_input" value="" />
+            <input type="text" id="search_input" value="" placeholder="Search a note name" />
             <div id="search_btn" class="control" title="Search a note">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-search"
                     viewBox="0 0 16 16">

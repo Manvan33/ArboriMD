@@ -81,7 +81,7 @@ function pageLoad() {
     document.querySelector("#open_all_btn").addEventListener("click", openAllFolders);
     document.querySelector("#close_all_btn").addEventListener("click", closeAllFolders);
     document.querySelector("#copy_link_btn").addEventListener("click", copy_link);
-    document.querySelector("#add_note_btn").addEventListener("click", new_note_dialog);
+    document.querySelector("#add_note_btn").addEventListener("click", add_note_dialog);
     document.querySelector("#search_input").addEventListener("input", e => {
         let term = e.target.value;
         clearResults();
@@ -95,6 +95,20 @@ function pageLoad() {
         if (e.key == "Enter") {
             clickFirstResult();
         }
+    });
+    document.querySelector("#add_note_url_btn").addEventListener("click", e => {
+        open_note(document.querySelector("#add_note_url").value);
+    });
+    document.querySelector("#create_new_btn").addEventListener("click", e => {
+        fetch("/create").then(response => {
+            if (response.status == 200) {
+                return response.text()
+            } else {
+                console.log("Failed to create note");
+            }
+        }).then(url => {
+            open_note(url);
+        });
     });
 }
 
@@ -176,9 +190,10 @@ function note_link(note) {
     li.setAttribute("id", note.id);
     if (note.id == state.getSelected()) {
         li.classList.add("selected");
+        li.scrollIntoView();
     }
     li.addEventListener("click", event => {
-        open_note(note.id);
+        open_note(CODIMD_URL + note.id);
         state.setSelected(note.id);
         li.classList.add("selected");
         document.querySelectorAll("#arbolist li").forEach(li => {
@@ -189,17 +204,26 @@ function note_link(note) {
 }
 
 // Function to open a note
-function open_note(id) {
-    document.querySelector('#codimd').src = CODIMD_URL + id;
-    fetch("/refresh/" + id);
-    state.setSelected(id);
-    loadList();
-    // Change url without reloading
-    history.pushState({}, "", "/" + id);
+function open_note(url) {
+    document.querySelector('#codimd').src = url;
+    let id = url.split("/").pop();
+    fetch("/refresh/" + id).then(response => {
+        if (response.status == 200) {
+            console.log("Refreshed note " + id);
+        } else {
+            console.log("Failed to refresh note " + id);
+        }
+        state.setSelected(id);
+        loadList();
+        // Change url without reloading
+        history.pushState({}, "", "/" + id);
+    });
 }
 
-function new_note_dialog() {
-    console.log("new note");
+function add_note_dialog() {
+    let actual_note_url = document.querySelector('#codimd').src;
+    document.querySelector('#add_note_url').value = actual_note_url;
+    document.querySelector("#add_note_dialog").classList.remove("hidden");
 }
 
 // Function to search for a note
@@ -216,6 +240,7 @@ function reveal_note(note) {
     folder.open = true;
     state.addOpened(folder.querySelector(".title").innerText);
     note.classList.add("found");
+    note.scrollIntoView();
 }
 
 function clearResults() {
