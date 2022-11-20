@@ -19,7 +19,7 @@ body {
 }
 
 aside {
-    transition: width 0.5s;
+    transition: 0.5s;
     display: flex;
     flex-direction: column;
     width: var(--aside-width-current);
@@ -34,8 +34,22 @@ aside #title {
     flex-grow: 2;
 }
 
-aside.hidden {
-    transition: width 0.5s;
+aside.hidden>div {
+    opacity: 0;
+    transition: 0.5s;
+}
+
+aside.hidden #title {
+    position: absolute;
+    top:0;
+    height: 30px;
+    margin-left: 5px;
+    font-size: 16px;
+    background: #333;
+    opacity: 1;
+}
+aside.hidden #tree {
+    transform: translateY(5px) rotate(90deg);
 }
 
 #controls-box {
@@ -194,7 +208,7 @@ footer a {
 iframe {
     width: calc(100vw - var(--aside-width-current));
     border: none;
-    transition: width 0.5;
+    transition: 0.5s;
 }
 
 .note-link {
