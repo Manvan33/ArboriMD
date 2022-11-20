@@ -193,12 +193,7 @@ function note_link(note) {
         li.scrollIntoView();
     }
     li.addEventListener("click", event => {
-        open_note(CODIMD_URL + note.id);
-        state.setSelected(note.id);
-        li.classList.add("selected");
-        document.querySelectorAll("#arbolist li").forEach(li => {
-            li.classList.remove("selected");
-        });
+        open_note(CODIMD_URL + note.id + "?edit");
     });
     return li;
 }
@@ -206,7 +201,7 @@ function note_link(note) {
 // Function to open a note
 function open_note(url) {
     document.querySelector('#codimd').src = url;
-    let id = url.split("/").pop();
+    let id = url.split("/").pop().split("?")[0];
     fetch("/refresh/" + id).then(response => {
         if (response.status == 200) {
             console.log("Refreshed note " + id);
