@@ -7,22 +7,27 @@ from dotenv import load_dotenv
 app = Flask(__name__, static_folder="static", template_folder="templates")
 
 load_dotenv()
-CODIMD_FQDN = getenv("CODIMD_FQDN")
+CODIMD_URL = getenv("CODIMD_URL")
 CODIMD_EMAIL = getenv("CODIMD_EMAIL")
 CODIMD_PASSWORD = getenv("CODIMD_PASSWORD")
 
-print(CODIMD_EMAIL, CODIMD_FQDN, CODIMD_PASSWORD)
-codimd = CodimdAPI(CODIMD_FQDN, CODIMD_EMAIL, CODIMD_PASSWORD)
+# Check that variables are set
+if not CODIMD_URL or not CODIMD_EMAIL or not CODIMD_PASSWORD:
+    print("Please set CODIMD_URL, CODIMD_EMAIL and CODIMD_PASSWORD in .env")
+    exit(1)
+
+print(CODIMD_EMAIL, CODIMD_URL, CODIMD_PASSWORD)
+codimd = CodimdAPI(CODIMD_URL, CODIMD_EMAIL, CODIMD_PASSWORD)
 
 
 @app.route('/')
 def index():
-    return render_template('index.html', url=CODIMD_FQDN, note_id="")
+    return render_template('index.html', url=CODIMD_URL, note_id="")
 
 
 @app.route('/<note_id>')
 def index_with_note(note_id):
-    return render_template('index.html', url=CODIMD_FQDN, note_id=note_id+"?"+request.query_string.decode("utf-8"))
+    return render_template('index.html', url=CODIMD_URL, note_id=note_id+"?"+request.query_string.decode("utf-8"))
 
 
 @app.route('/list')

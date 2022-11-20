@@ -38,7 +38,10 @@ class State {
     getOpened() {
         return this.loadState().opened;
     }
-
+    clearOpened() {
+        this.state.opened = [];
+        this.storeState();
+    }
     addOpened(folder) {
         this.loadState().opened.push(folder);
         this.storeState();
@@ -61,12 +64,12 @@ let state = null;
 function toggle_aside() {
     // Get the root element
     var r = document.querySelector(':root');
-    if (r.style.getPropertyValue("--aside-width") == "0px") {
+    if (r.style.getPropertyValue("--aside-width-current") == "var(--aside-width-collapsed)") {
         document.querySelector("#aside").classList.remove("hidden");
-        r.style.setProperty("--aside-width", "18vw");
+        r.style.setProperty("--aside-width-current", "var(--aside-width-extended)");
     } else {
         document.querySelector("#aside").classList.add("hidden");
-        r.style.setProperty("--aside-width", "0px");
+        r.style.setProperty("--aside-width-current", "var(--aside-width-collapsed)");
     }
 }
 
@@ -74,12 +77,11 @@ function pageLoad() {
     state = new State();
     state.setSelected(window.location.pathname.slice(1));
     loadList();
-    document.querySelector("#enable_btn").addEventListener("click", e => {
-        toggle_aside();
-    });
-    document.querySelector("#tree_btn").addEventListener("click", e => {
-        toggle_aside();
-    });
+    document.querySelector("#title_bar").addEventListener("click", toggle_aside);
+    document.querySelector("#open_all_btn").addEventListener("click", openEverything);
+    document.querySelector("#close_all_btn").addEventListener("click", closeEverything);
+    document.querySelector("#copy_link_btn").addEventListener("click", copy_link);
+    document.querySelector("#add_note_btn").addEventListener("click", new_note_dialog);
 }
 
 function loadList() {
@@ -92,9 +94,40 @@ function loadList() {
                 root.appendChild(createFolder(folder, data[folder]));
             });
         });
-    document.querySelector("#ctrl-copy").addEventListener("click", copy_link);
 }
 
+
+// Function to open all folders
+function openEverything() {
+    state.clearOpened();
+    document.querySelectorAll("#arbolist details").forEach(details => {
+        details.open = true;
+        state.addOpened(details.querySelector(".title").innerText);
+    });
+}
+
+// Function to close all folders
+function closeEverything() {
+    state.clearOpened();
+    document.querySelectorAll("#arbolist details").forEach(details => {
+        details.open = false;
+    });
+}
+
+// Function to copy the link to the current note
+function copy_link() {
+    let link_content = document.querySelector('#codimd').src;
+    tmp_input = document.createElement('input');
+    tmp_input.value = link_content;
+    tmp_input.style.position = 'absolute';
+    document.body.appendChild(tmp_input);
+    tmp_input.select();
+    document.execCommand("copy");
+    document.body.removeChild(tmp_input);
+    alert("Link copied to clipboard");
+}
+
+// Function to create a folder 
 function createFolder(name, data) {
     // Clone the node
     let folder = document.querySelector("#folder_template").cloneNode(true);
@@ -121,18 +154,7 @@ function createFolder(name, data) {
     return folder;
 }
 
-function copy_link() {
-    let link_content = document.querySelector('#codimd').src;
-    tmp_input = document.createElement('input');
-    tmp_input.value = link_content;
-    tmp_input.style.position = 'absolute';
-    document.body.appendChild(tmp_input);
-    tmp_input.select();
-    document.execCommand("copy");
-    document.body.removeChild(tmp_input);
-    alert("Link copied to clipboard");
-}
-
+// Function to create a note entry
 function note_link(note) {
     let li = document.createElement('li');
     li.innerText = note.title;
@@ -151,6 +173,7 @@ function note_link(note) {
     return li;
 }
 
+// Function to open a note
 function open_note(id) {
     document.querySelector('#codimd').src = CODIMD_URL + id;
     fetch("/refresh/" + id);
@@ -158,4 +181,8 @@ function open_note(id) {
     loadList();
     // Change url without reloading
     history.pushState({}, "", "/" + id);
+}
+
+function new_note_dialog() {
+    console.log("new note");
 }

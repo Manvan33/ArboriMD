@@ -1,6 +1,8 @@
 /* Set a variable w */
 :root {
-    --aside-width: 18vw;
+    --aside-width-extended: 18vw;
+    --aside-width-collapsed: 0vw;
+    --aside-width-current: var(--aside-width-extended);
 }
 
 * {
@@ -20,57 +22,69 @@ aside {
     transition: width 0.5s;
     display: flex;
     flex-direction: column;
-    width: var(--aside-width);
+    width: var(--aside-width-current);
     align-items: center;
+    justify-content: flex-start;
     box-shadow: inset 70px 0 70px -20px rgba(0, 0, 0, .5);
     border-right: 1px solid #555;
 }
 
-aside h1 {
-    cursor: pointer;
-    background: #333;
-    font-size: 14px;
-    transform: translateX(1px);
-    position: absolute;
-    top: 0;
-    left: var(--aside-width);
-    transition: left 0.5s;
-    width: 90px;
-    height: 30px;
-    padding: 10px;
+aside #title {
+    margin: 10px;
+    flex-grow: 2;
 }
 
 aside.hidden {
     transition: width 0.5s;
-    transition-delay: opacity 0.5s;
-    opacity: 0;
 }
 
-aside h1 svg {
-    transform: translateY(4px);
-}
-
-aside.hidden h1 {
+aside.hidden #title {
+    position: absolute;
     transition: left 0.5s;
+    left: 0;
+    top: 0;
+    margin: 0;
+    width: 15px;
+    height: 30px;
+    font-size: 0;
+    background: #333;
 }
 
-aside.hidden h1 svg {
-    transform: translate(-3px, 5px) rotate(90deg);
-    transition: transform 0.5s;
-}
 
-aside #controls-box {
+#controls-box {
+    padding: 2px 0;
     display: flex;
     justify-content: space-around;
+    flex-wrap: wrap;
     width: 100%;
+    border: 1px solid #555;
 }
 
 .control {
-    border: 1px solid #555;
-    padding: 8px;
-    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     height: 30px;
     cursor: pointer;
+    flex-grow: 1;
+}
+
+#link-box {
+    width: calc(var(--aside-width-current) - 18px);
+    margin-top: 10px;
+    justify-content: center;
+    padding: 2px 5px;
+    border: 2px solid #555;
+    border-radius: 20px;
+    height: 20px;
+}
+
+#link-input {
+    width: 80%;
+    margin: 0 0 0 10px;
+    background: transparent;
+    border: none;
+    height: 20px;
 }
 
 #folder_template {
@@ -79,24 +93,31 @@ aside #controls-box {
 
 .flex {
     display: flex;
-    flex-direction: row;
-    justify-content: space-around;
+    align-items: center;
     width: 100%;
 }
 
 #arbolist {
-    padding: 10px;
-    width: 100%;
-    overflow-y: auto;
+    margin: 15px;
+    width: calc(var(--aside-width-current) - 18px);
     scrollbar-width: thin;
+    overflow: auto;
+    padding: 5px 0 10px 0;
+    border-bottom: 1px solid #555;
+    border-top: 1px solid #555;
 }
 
 details>summary {
     list-style: none;
+    cursor: s-resize;
+}
+
+details[open]>summary {
+    cursor: n-resize;
 }
 
 details[open] .opened {
-    display: inline;
+    display: initial;
 }
 
 details[open] .closed {
@@ -108,22 +129,34 @@ details .opened {
 }
 
 details .closed {
-    display: inline;
+    display: initial;
 }
 
-details svg {
+details svg, #title svg {
     transform: translateY(3px);
 }
 
+footer {
+    margin: auto 0 10px;
+    color: white;
+}
+
+footer a {
+    color: white;
+    text-decoration: none;
+    color: #BBB
+}
+
 iframe {
-    width: calc(100vw - var(--aside-width));
+    width: calc(100vw - var(--aside-width-current));
     border: none;
+    transition: width 0.5;
 }
 
 li {
     list-style-type: none;
-    margin: 2px 0 0 5px;
-    text-overflow: ellipsis;
+    margin: 2px 0 0 8px;
+    text-overflow: clip;
     white-space: nowrap;
     cursor: pointer;
 }
@@ -134,4 +167,10 @@ li:hover {
 
 li.selected {
     background-color: #555;
+}
+
+@media screen and (max-width: 600px) {
+    :root {
+        --aside-width-extended: 50vw;
+    }
 }
