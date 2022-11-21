@@ -10,6 +10,8 @@ function getFromCookie(key) {
     return null;
 }
 
+let latest_list = {};
+
 class State {
     constructor() {
         this.state = JSON.parse(getFromCookie("state"));
@@ -116,6 +118,9 @@ function loadList() {
     fetch("/list")
         .then(response => response.json())
         .then(data => {
+            if (latest_list === data) {
+                return;
+            }
             let root = document.querySelector('#arbolist');
             root.innerHTML = "";
             Object.keys(data).forEach(folder => {
@@ -165,6 +170,7 @@ function createFolder(name, data) {
     title.innerText = name;
     folder.appendChild(summary);
     summary.addEventListener("click", event => {
+        refresh_current();
         if (folder.open) {
             state.removeOpened(name);
         } else {
@@ -200,6 +206,11 @@ function note_link(note) {
 
 // Function to open a note
 function open_note(url) {
+    // Check if the note is already open
+    if (document.querySelector('#codimd').src == url) {
+        return;
+    }
+    refresh_current();
     document.querySelector('#codimd').src = url;
     let id = url.split("/").pop().split("?")[0];
     fetch("/refresh/" + id).then(response => {
@@ -212,6 +223,17 @@ function open_note(url) {
         loadList();
         // Change url without reloading
         history.pushState({}, "", "/" + id);
+    });
+}
+
+function refresh_current() {
+    // Refresh the current note
+    fetch("/refresh/" + state.getSelected()).then(response => {
+        if (response.status != 200) {
+            console.log("Failed to refresh note " + id);
+        } else {
+            loadList();
+        }
     });
 }
 
