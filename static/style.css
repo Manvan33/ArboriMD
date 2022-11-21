@@ -11,7 +11,7 @@
 }
 
 body {
-    font: 14px Helvetica, Arial, sans-serif;
+    font: 15px Helvetica, Arial, sans-serif;
     display: flex;
     height: 100vh;
     background-color: #333;
@@ -87,11 +87,13 @@ label {
     margin-right: px;
 }
 
-#title #add_note_dialog {
+#add_note_dialog {
+    margin: 12px 0 0 0;
     padding: 8px 0;
     background: #222;
     border-radius: 10px;
     min-width: 80%;
+    box-shadow: -3px 3px 10px #444;
 }
 
 #add_note_dialog h2 {
@@ -111,7 +113,7 @@ label {
 #add_note_url_btn,
 #create_new_btn {
     margin-top: 5px;
-    width: 90%;
+    min-width: 10px;
     cursor: pointer;
     border: 2px solid #555;
     border-radius: 10px;
@@ -128,6 +130,7 @@ label {
     border: 2px solid #555;
     border-radius: 20px;
     height: 20px;
+    box-shadow: 5px 5px 10px #222;
 }
 
 #search_input {
