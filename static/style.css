@@ -41,13 +41,14 @@ aside.hidden>div {
 
 aside.hidden #title {
     position: absolute;
-    top:0;
+    top: 0;
     height: 30px;
     margin-left: 5px;
     font-size: 16px;
     background: #333;
     opacity: 1;
 }
+
 aside.hidden #tree {
     transform: translateY(5px) rotate(90deg);
 }
@@ -86,15 +87,20 @@ label {
     margin-right: px;
 }
 
-#add_note_dialog {
+#title #add_note_dialog {
     padding: 8px 0;
     background: #222;
     border-radius: 10px;
+    min-width: 80%;
 }
 
 #add_note_dialog h2 {
     font-size: 16px;
     margin: 0 10px 12px 10px;
+}
+
+#hide_note_btn {
+    cursor: pointer;
 }
 
 #add_note_url {
@@ -164,9 +170,14 @@ label {
     border-top: 1px solid #555;
 }
 
+.title {
+    font-weight: bold;
+}
+
 details>summary {
     list-style: none;
     cursor: s-resize;
+    margin: 8px 0;
 }
 
 details[open]>summary {
@@ -213,7 +224,7 @@ iframe {
 
 .note-link {
     list-style-type: none;
-    margin: 2px 0 0 8px;
+    margin: 4px 0 2px 8px;
     white-space: nowrap;
     cursor: pointer;
 }
