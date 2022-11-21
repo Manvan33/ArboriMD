@@ -100,6 +100,7 @@ function pageLoad() {
     });
     document.querySelector("#add_note_url_btn").addEventListener("click", e => {
         open_note(document.querySelector("#add_note_url").value);
+        hide_note_dialog();
     });
     document.querySelector("#create_new_btn").addEventListener("click", e => {
         fetch("/create").then(response => {
@@ -110,8 +111,10 @@ function pageLoad() {
             }
         }).then(url => {
             open_note(url);
+            hide_note_dialog();
         });
     });
+    document.querySelector("#hide_note_btn").addEventListener("click", hide_note_dialog);
 }
 
 function loadList() {
@@ -241,6 +244,10 @@ function add_note_dialog() {
     let actual_note_url = document.querySelector('#codimd').src;
     document.querySelector('#add_note_url').value = actual_note_url;
     document.querySelector("#add_note_dialog").classList.remove("hidden");
+}
+
+function hide_note_dialog() {
+    document.querySelector("#add_note_dialog").classList.add("hidden");
 }
 
 // Function to search for a note
