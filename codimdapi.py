@@ -14,16 +14,16 @@ class CodimdAPI:
             "email": self.email, "password": self.password}, headers={"Referer": self.url})
 
     def logged_in_request(self, method, url, return_redirect=False):
-        print(f"{method} - {url} - return redirect={return_redirect}")
+        # print(f"{method} - {url} - return redirect={return_redirect}")
         try:
             result = self.session.request(method, url, allow_redirects=False)
-            print(result.status_code)
+            # print(result.status_code)
         except AttributeError:
-            print("AttributeError")
+            # print("AttributeError")
             self.login()
             return self.logged_in_request(method, url, return_redirect=return_redirect)
         if result.status_code == 302 and return_redirect==False:
-            print("not logged in", return_redirect)
+            # print("not logged in", return_redirect)
             self.login()
             return self.logged_in_request(method, url, return_redirect=return_redirect)
         return result
