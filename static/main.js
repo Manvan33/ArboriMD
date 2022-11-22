@@ -77,6 +77,9 @@ function toggle_aside() {
 
 function pageLoad() {
     state = new State();
+    if (NOTE_TO_OPEN != "") {
+        open_note(CODIMD_URL + NOTE_TO_OPEN + "?edit");
+    }
     state.setSelected(window.location.pathname.slice(1));
     loadList();
     document.querySelector("#title_bar").addEventListener("click", toggle_aside);

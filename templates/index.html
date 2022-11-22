@@ -105,8 +105,11 @@
         </div>
         <footer><a target="_blank" href="https://github.com/Manvan33/ArboriMD">Made by Manvan</a></footer>
     </aside>
-    <iframe id="codimd" src="{{ url }}{{ note_id }}"></iframe>
-    <script>let CODIMD_URL = "{{ url }}"</script>
+    <iframe id="codimd"></iframe>
+    <script>
+        let CODIMD_URL = "{{ url }}"
+        let NOTE_TO_OPEN = "{{ note_id }}"
+    </script>
     <script src="/static/main.js"></script>
 </body>
 
