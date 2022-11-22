@@ -26,6 +26,24 @@ CODIMD_PASSWORD=yourpassword
 EOF
 ```
 
+If you want to use OIDC login, add the following to `.env`:
+
+```bash
+cat << EOF >> .env
+OIDC_CLIENT_ID=youroidcclientid
+OIDC_CLIENT_SECRET=youroidcclientsecret
+OIDC_DISCOVERY_URL=https://youroidcserver.com/.well-known/openid-configuration
+EOF
+```
+
+Otherwise, you have to disable login
+    
+```bash
+cat << EOF >> .env
+DISABLE_LOGIN=true
+EOF
+```
+
 ## Usage
 
 To run the program, run:
