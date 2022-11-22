@@ -247,12 +247,18 @@ iframe {
     color: aquamarine;
 }
 
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 800px) {
     :root {
-        --aside-width-extended: 50vw;
+        --aside-width-extended: 45vw;
     }
     
     aside.hidden #title {
         font-size: 0px;
+    }
+}
+
+@media screen and (min-width: 1400px) {
+    :root {
+        --aside-width-extended: 14vw;
     }
 }
