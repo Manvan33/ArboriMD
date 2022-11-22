@@ -1,4 +1,4 @@
-/* Set a variable w */
+/* Set a variable width */
 :root {
     --aside-width-extended: 18vw;
     --aside-width-collapsed: 0vw;
@@ -34,23 +34,26 @@ aside #title {
     flex-grow: 2;
 }
 
-aside.hidden>div {
+aside.hidden>div, aside.hidden>footer {
     opacity: 0;
     transition: 0.5s;
 }
 
 aside.hidden #title {
     position: absolute;
-    top: 0;
+    top: 6px;
+    left: 1px;
     height: 30px;
-    margin-left: 5px;
+    padding: 1px 10px 7px 0;
+    border-radius: 0 20px 20px 0;
+    margin: 0;
     font-size: 16px;
     background: #333;
     opacity: 1;
 }
 
 aside.hidden #tree {
-    transform: translateY(5px) rotate(90deg);
+    transform: translateY(6px) rotate(90deg);
 }
 
 #controls-box {
@@ -247,5 +250,9 @@ iframe {
 @media screen and (max-width: 600px) {
     :root {
         --aside-width-extended: 50vw;
+    }
+    
+    aside.hidden #title {
+        font-size: 0px;
     }
 }
