@@ -3,6 +3,7 @@ import requests
 
 class CodimdAPI:
     def __init__(self, url, email, password):
+        print(f"{url=}, {email=}, {password=}")
         self.url = url
         self.email = email
         self.password = password

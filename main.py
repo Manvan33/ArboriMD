@@ -1,37 +1,79 @@
-from flask import Flask, render_template, request
-from codimdapi import CodimdAPI
 import json
+import requests
+
+from flask import Flask, render_template, request, redirect, url_for
+from secrets import token_hex
 from os import getenv
 from dotenv import load_dotenv
+from flask_login import LoginManager, login_user, current_user
 
-app = Flask(__name__, static_folder="static", template_folder="templates")
+from codimdapi import CodimdAPI
+from oidc import User, OIDC
 
+# Loading environment variables
 load_dotenv()
 CODIMD_URL = getenv("CODIMD_URL")
 CODIMD_EMAIL = getenv("CODIMD_EMAIL")
 CODIMD_PASSWORD = getenv("CODIMD_PASSWORD")
+LOGIN_DISABLED = getenv("LOGIN_DISABLED", False) == "True"
+# Optional variables for OIDC login
+if not LOGIN_DISABLED:
+    OIDC_CLIENT_ID = getenv("OIDC_CLIENT_ID")
+    OIDC_CLIENT_SECRET = getenv("OIDC_CLIENT_SECRET")
+    OIDC_DISCOVERY_URL = getenv("OIDC_DISCOVERY_URL")
+    if not OIDC_CLIENT_ID or not OIDC_CLIENT_SECRET or not OIDC_DISCOVERY_URL:
+        raise ValueError("OIDC_CLIENT_ID, OIDC_CLIENT_SECRET and OIDC_DISCOVERY_URL must be set. Otherwise set LOGIN_DISABLED to True")
+    else:
+        oidc_tool = OIDC(OIDC_DISCOVERY_URL, OIDC_CLIENT_ID, OIDC_CLIENT_SECRET)
 
-# Check that variables are set
+# Necessary variables
 if not CODIMD_URL or not CODIMD_EMAIL or not CODIMD_PASSWORD:
     print("Please set CODIMD_URL, CODIMD_EMAIL and CODIMD_PASSWORD in .env")
     exit(1)
 
-print(CODIMD_EMAIL, CODIMD_URL, CODIMD_PASSWORD)
+# Initialize Flask app
+app = Flask(__name__, static_folder="static", template_folder="templates")
+# flask_login will use this to disable login if needed
+app.config["LOGIN_DISABLED"] = LOGIN_DISABLED 
+app.secret_key = token_hex()
+
+# Initialize flask_login
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = "login"
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.get_user(user_id)
+
+@app.before_request
+def check_login():
+    if app.config["LOGIN_DISABLED"]:
+        return
+    if request.endpoint in ['login', 'oidc']:
+        return
+    if not current_user.is_authenticated:
+        return login_manager.unauthorized()
+
+
+# Initialize CodimdAPI
 codimd = CodimdAPI(CODIMD_URL, CODIMD_EMAIL, CODIMD_PASSWORD)
 
+# Converts a codimd history entry to a dict of tag-folders (keys) and notes (values)
+restructure_entry = lambda entry: {"id": entry["id"], "title": entry["text"], "timestamp": entry["time"]}
 
 @app.route('/')
 def index():
     return render_template('index.html', url=CODIMD_URL, note_id="")
 
-
+# Load a note from the URL
 @app.route('/<note_id>')
 def index_with_note(note_id):
     return render_template('index.html', url=CODIMD_URL, note_id=note_id+"?"+request.query_string.decode("utf-8"))
 
-
+# Returns all notes from history
 @app.route('/list')
-def list():
+def list() -> json:
     list = {"unsorted": []}
     data = codimd.get_history()
     for entry in data['history']:
@@ -57,9 +99,22 @@ def create():
 def delete(note_id):
     return codimd.delete_note(note_id) and "OK" or (404, "ERROR")
 
-def restructure_entry(entry): return {
-    "id": entry["id"], "title": entry["text"], "timestamp": entry["time"]}
+@app.route('/login')
+def login():
+    if app.config["LOGIN_DISABLED"]:
+        return redirect(url_for('index'))
+    redirect_url = url_for("oidc", _external=True)
+    return redirect(oidc_tool.get_auth_url(redirect_url))
 
+@app.route("/oidc")
+def oidc():
+    redirect_url = url_for("oidc", _external=True)
+    code = request.args.get("code")
+    ok, username = oidc_tool.validate_code(code, redirect_url)
+    if not ok:
+        return "Error", 400
+    login_user(User.get_user(username))
+    return redirect("/")    
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
