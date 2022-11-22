@@ -51,3 +51,12 @@ To run the program, run:
 ```bash
 python3 main.py
 ```
+
+## Production
+
+We will use gunicorn to serve the app, and nginx as a reverse proxy. 
+
+```bash
+gunicorn -w 4 -b 0.0.0.0:5000 "main:app"
+```
+
