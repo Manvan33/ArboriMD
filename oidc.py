@@ -40,17 +40,17 @@ class OIDC:
             'code': code,
             'redirect_uri': redirect_url
         }
-        response = requests.post(url=self.token_endpoint, data=payload)
+        response = requests.post(url=self.token_endpoint, data=payload)#,proxies={"http": "127.0.0.1:8080", "https": "127.0.0.1:8080"}, verify=False)
         if not response.status_code == 200:
-            return False, "Authentication failed"
+            return False, "Code validation failed"
         response = response.json()
         # Checks which user is logged in
         payload2 = {
             'token': response['access_token'],
             'client_id': self.client_id,
-            'client_secret': self.client_secret,
+            'client_secret': self.client_secret
         }
         response = requests.post(url=self.introspection_endpoint, data=payload2)
         if not response.status_code == 200:
-            return (False, "Authentication failed")
+            return False, "Instrospection failed"
         return True, response.json()["preferred_username"]

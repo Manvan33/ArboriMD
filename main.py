@@ -1,5 +1,4 @@
 import json
-import requests
 
 from flask import Flask, render_template, request, redirect, url_for
 from secrets import token_hex
@@ -102,19 +101,19 @@ def delete(note_id):
 @app.route('/login')
 def login():
     if app.config["LOGIN_DISABLED"]:
-        return redirect(url_for('index'))
-    redirect_url = url_for("oidc", _external=True)
+        return redirect(url_for('index')+ "?" + request.query_string.decode("utf-8"))
+    redirect_url = url_for("oidc", _external=True) + "?" + request.query_string.decode("utf-8")
     return redirect(oidc_tool.get_auth_url(redirect_url))
 
 @app.route("/oidc")
 def oidc():
-    redirect_url = url_for("oidc", _external=True)
-    code = request.args.get("code")
-    ok, username = oidc_tool.validate_code(code, redirect_url)
+    redirect_url = url_for('oidc', _external=True)+ "?next=" + request.args.get("next")
+    auth_code = request.args.get("code")
+    ok, username = oidc_tool.validate_code(auth_code, redirect_url)
     if not ok:
-        return "Error", 400
-    login_user(User.get_user(username))
-    return redirect("/")    
+        return "Error: "+username, 400
+    login_user(User.get_user(username), remember=True)
+    return redirect(request.args.get("next"))
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
