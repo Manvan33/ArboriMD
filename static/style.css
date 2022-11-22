@@ -34,7 +34,8 @@ aside #title {
     flex-grow: 2;
 }
 
-aside.hidden>div, aside.hidden>footer {
+aside.hidden>div,
+aside.hidden>footer {
     opacity: 0;
     transition: 0.5s;
 }
@@ -251,7 +252,7 @@ iframe {
     :root {
         --aside-width-extended: 45vw;
     }
-    
+
     aside.hidden #title {
         font-size: 0px;
     }

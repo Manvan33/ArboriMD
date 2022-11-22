@@ -60,3 +60,44 @@ We will use gunicorn to serve the app, and nginx as a reverse proxy.
 gunicorn -w 4 -b 0.0.0.0:5000 "main:app"
 ```
 
+Example nginx config:
+
+```config
+server {
+    if ($host = a.notes.rezel.net) {
+        return 301 https://$host$request_uri;
+    }
+    listen                    80;
+    listen                    [::]:80;
+    server_name               a.notes.rezel.net;
+    location / {
+        proxy_pass http://127.0.0.1:5000;
+    }
+    location /static {
+        alias /opt/ArboriMD/static;
+    }
+}
+
+server {
+    listen                    443 ssl;
+    listen                    [::]:443 ssl http2;
+    server_name               a.notes.rezel.net;
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+
+    client_max_body_size 100M;
+
+    location / {
+        proxy_pass http://127.0.0.1:5000;
+        include proxy_params;
+      proxy_http_version 1.1;
+      proxy_set_header Upgrade $http_upgrade;
+      proxy_set_header Connection "upgrade";
+    }
+    location /static {
+        alias /opt/ArboriMD/static;
+    }
+    ssl_certificate /etc/letsencrypt/live/a.notes.rezel.net/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/a.notes.rezel.net/privkey.pem; # managed by Certbot
+}
+```
