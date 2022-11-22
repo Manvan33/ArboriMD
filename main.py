@@ -20,8 +20,9 @@ if not LOGIN_DISABLED:
     OIDC_CLIENT_ID = getenv("OIDC_CLIENT_ID")
     OIDC_CLIENT_SECRET = getenv("OIDC_CLIENT_SECRET")
     OIDC_DISCOVERY_URL = getenv("OIDC_DISCOVERY_URL")
-    if not OIDC_CLIENT_ID or not OIDC_CLIENT_SECRET or not OIDC_DISCOVERY_URL:
-        raise ValueError("OIDC_CLIENT_ID, OIDC_CLIENT_SECRET and OIDC_DISCOVERY_URL must be set. Otherwise set LOGIN_DISABLED to True")
+    SECRET_KEY = getenv("SECRET_KEY")
+    if not OIDC_CLIENT_ID or not OIDC_CLIENT_SECRET or not OIDC_DISCOVERY_URL or not SECRET_KEY:
+        raise ValueError("OIDC_CLIENT_ID, OIDC_CLIENT_SECRET, OIDC_DISCOVERY_URL and SECRET_KEY must be set. Otherwise set LOGIN_DISABLED to True")
     else:
         oidc_tool = OIDC(OIDC_DISCOVERY_URL, OIDC_CLIENT_ID, OIDC_CLIENT_SECRET)
 
@@ -34,7 +35,7 @@ if not CODIMD_URL or not CODIMD_EMAIL or not CODIMD_PASSWORD:
 app = Flask(__name__, static_folder="static", template_folder="templates")
 # flask_login will use this to disable login if needed
 app.config["LOGIN_DISABLED"] = LOGIN_DISABLED 
-app.secret_key = token_hex()
+app.secret_key = SECRET_KEY
 
 # Initialize flask_login
 login_manager = LoginManager()

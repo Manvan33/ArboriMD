@@ -33,6 +33,7 @@ cat << EOF >> .env
 OIDC_CLIENT_ID=youroidcclientid
 OIDC_CLIENT_SECRET=youroidcclientsecret
 OIDC_DISCOVERY_URL=https://youroidcserver.com/.well-known/openid-configuration
+SECRET_KEY=$(openssl rand -hex 32)
 EOF
 ```
 
