@@ -205,6 +205,7 @@ function note_link(note) {
         li.scrollIntoView();
     }
     li.addEventListener("click", event => {
+        event.target.classList.add("selected");
         open_note(CODIMD_URL + note.id + "?edit");
     });
     return li;
