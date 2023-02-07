@@ -13,7 +13,6 @@ load_dotenv()
 CODIMD_URL = getenv("CODIMD_URL")
 CODIMD_EMAIL = getenv("CODIMD_EMAIL")
 CODIMD_PASSWORD = getenv("CODIMD_PASSWORD")
-print("Login omg "+getenv("LOGIN_DISABLED"))
 LOGIN_DISABLED = getenv("LOGIN_DISABLED", False) == "True"
 # Optional variables for OIDC login
 if not LOGIN_DISABLED:
