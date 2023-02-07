@@ -129,7 +129,7 @@ function loadList() {
             }
             let root = document.querySelector('#arbolist');
             root.innerHTML = "";
-            Object.keys(data).sort().forEach(folder => {
+            Object.keys(data).sort((a, b) => { return a.localeCompare(b) }).forEach(folder => {
                 root.appendChild(createFolder(folder, data[folder]));
             });
         });
