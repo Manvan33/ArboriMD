@@ -29,10 +29,10 @@
                 {% include 'svg/caret-down.html' %}
             </div>
 
-            <div id="copy_link_btn" class="control" title="Copy link to note">
+            <div id="copy_link_btn" class="control" title="Add existing note to ArboriMD">
                 {% include 'svg/link.html' %}
             </div>
-            <div id="add_note_btn" class="control" title="Add a note">
+            <div id="create_note_btn" class="control" title="Create a note">
                 {% include 'svg/file-earmark-plus.html' %}
             </div>
         </div>
@@ -40,11 +40,8 @@
             <h2>Add a note<span class="right" id="hide_note_btn">x</span></h2>
             <div class="flex column">
                 <!-- Form with no action, only javascript -->
-                <label for="add_note_url">Existing note</label>
                 <input type="text" id="add_note_url" value="" placeholder="Enter the note URL" />
                 <button type="button" id="add_note_url_btn">Add</button>
-                OR
-                <button id="create_new_btn">Create a new note</button>
             </div>
         </div>
         <div id="search_box" class="flex">

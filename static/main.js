@@ -10,7 +10,7 @@ function getFromCookie(key) {
     return null;
 }
 
-let latest_list = {};
+let latest_list_json = "";
 
 class State {
     constructor() {
@@ -85,8 +85,19 @@ function pageLoad() {
     document.querySelector("#title_bar").addEventListener("click", toggle_aside);
     document.querySelector("#open_all_btn").addEventListener("click", openAllFolders);
     document.querySelector("#close_all_btn").addEventListener("click", closeAllFolders);
-    document.querySelector("#copy_link_btn").addEventListener("click", copy_link);
-    document.querySelector("#add_note_btn").addEventListener("click", add_note_dialog);
+    document.querySelector("#copy_link_btn").addEventListener("click", add_note_dialog);
+    document.querySelector("#create_note_btn").addEventListener("click", e => {
+        fetch("/create").then(response => {
+            if (response.status == 200) {
+                return response.text()
+            } else {
+                console.log("Failed to create note");
+            }
+        }).then(url => {
+            open_note(url);
+            hide_note_dialog();
+        });
+    });
     document.querySelector("#search_input").addEventListener("input", e => {
         let term = e.target.value;
         clearResults();
@@ -105,37 +116,66 @@ function pageLoad() {
         open_note(document.querySelector("#add_note_url").value);
         hide_note_dialog();
     });
-    document.querySelector("#create_new_btn").addEventListener("click", e => {
-        fetch("/create").then(response => {
-            if (response.status == 200) {
-                return response.text()
-            } else {
-                console.log("Failed to create note");
-            }
-        }).then(url => {
-            open_note(url);
-            hide_note_dialog();
-        });
-    });
     document.querySelector("#hide_note_btn").addEventListener("click", hide_note_dialog);
+    // Alt + A toggles the aside
+    document.addEventListener("keydown", e => {
+        if (e.altKey && e.key == "a") {
+            e.preventDefault();
+            toggle_aside();
+        }
+        // Ctrl + F focuses the search bar
+        else if (e.ctrlKey && e.key == "f") {
+            e.preventDefault();
+            document.querySelector("#search_input").focus();
+        }
+        // Ctrl + Baclspace deletes the current note
+        else if (e.ctrlKey && e.key == "Backspace") {
+            e.preventDefault();
+            ask_for_deletion(state.getSelected());
+        }
+    });
 }
 
 function loadList() {
     fetch("/list")
         .then(response => response.json())
         .then(data => {
-            if (latest_list === data) {
+            const new_list_json = JSON.stringify(data);
+            if (latest_list_json === new_list_json) {
+                console.log("no change");
+                applyState();
                 return;
             }
+            latest_list_json = new_list_json;
             let root = document.querySelector('#arbolist');
             root.innerHTML = "";
             Object.keys(data).sort((a, b) => { return a.localeCompare(b) }).forEach(folder => {
                 root.appendChild(createFolder(folder, data[folder]));
             });
+            applyState();
         });
 }
 
-
+function applyState() {
+    let opened = state.getOpened();
+    document.querySelectorAll("#arbolist details").forEach(details => {
+        let title = details.querySelector(".title").innerText;
+        if (opened.includes(title)) {
+            details.open = true;
+        } else {
+            details.open = false;
+        }
+    });
+    let selected = state.getSelected();
+    document.querySelectorAll(".note-link").forEach(link => {
+        if (link.getAttribute("note_id") == selected) {
+            link.classList.add("selected");
+            //link.scrollIntoView();
+        } else {
+            link.classList.remove("selected");
+        }
+    });
+}
 // Function to open all folders
 function openAllFolders() {
     state.clearOpened();
@@ -176,21 +216,21 @@ function createFolder(name, data) {
     title.innerText = name;
     folder.appendChild(summary);
     summary.addEventListener("click", event => {
-        refresh_current();
         if (folder.open) {
             state.removeOpened(name);
         } else {
             state.addOpened(name);
         }
+        refresh_current();
     });
-    if (state.getOpened().includes(name)) {
-        folder.open = true;
-    }
     let ul = document.createElement('ul');
     // sort the notes by title
     data = data.sort((a, b) => { return a.title.localeCompare(b.title) });
     data.forEach(note => {
         ul.appendChild(note_link(note));
+        if (note.id == state.getSelected()) {
+            folder.open = true;
+        }
     });
     folder.appendChild(ul);
     return folder;
@@ -199,21 +239,16 @@ function createFolder(name, data) {
 // Function to create a note entry
 function note_link(note) {
     let node = document.querySelector("#note_link_template").cloneNode(true);
+    node.removeAttribute("id");
     node.querySelector(".note_title").innerText = note.title;
     node.setAttribute("note_id", note.id);
-    if (note.id == state.getSelected()) {
-        node.classList.add("selected");
-        node.scrollIntoView();
-    }
     node.addEventListener("click", event => {
         event.target.classList.add("selected");
         open_note(CODIMD_URL + note.id + "?edit");
     });
     node.querySelector(".note_delete").addEventListener("click", event => {
         event.stopPropagation();
-        if (confirm('Are you sure you want to delete "' + note.title + '" ?')) {
-            delete_note(note.id);
-        }
+        ask_for_deletion(note.id);
     });
     node.style.display = "block";
     return node;
@@ -221,13 +256,10 @@ function note_link(note) {
 
 // Function to open a note
 function open_note(url) {
-    // Check if the note is already open
-    if (document.querySelector('#codimd').src == url) {
-        return;
-    }
     refresh_current();
     document.querySelector('#codimd').src = url;
     let id = url.split("/").pop().split("?")[0];
+    console.log("Opening note " + id);
     fetch("/refresh/" + id).then(response => {
         if (response.status == 200) {
             console.log("Refreshed note " + id);
@@ -287,6 +319,13 @@ function clearResults() {
 
 function clickFirstResult() {
     document.querySelectorAll(".found")[0].click();
+}
+
+function ask_for_deletion(id) {
+    title = document.querySelector(".note-link[note_id='" + id + "'] .note_title").innerText;
+    if (confirm('Are you sure you want to delete "' + title + '" ?')) {
+        delete_note(id);
+    }
 }
 
 function delete_note(id) {

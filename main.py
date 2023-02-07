@@ -68,7 +68,8 @@ codimd = CodimdAPI(CODIMD_URL, CODIMD_EMAIL, CODIMD_PASSWORD)
 
 # Converts a codimd history entry to a dict of tag-folders (keys) and notes (values)
 def restructure_entry(entry):
-    return {"id": entry["id"], "title": entry["text"], "timestamp": entry["time"]}
+    # return {"id": entry["id"], "title": entry["text"], "timestamp": entry["time"]}
+    return {"id": entry["id"], "title": entry["text"]}
 
 
 @app.route('/')
