@@ -253,7 +253,7 @@ function refresh_current() {
 }
 
 function add_note_dialog() {
-    let actual_note_url = get_iframe_href();
+    let actual_note_url = "";
     document.querySelector('#add_note_url').value = actual_note_url;
     document.querySelector("#add_note_dialog").classList.remove("hidden");
 }
