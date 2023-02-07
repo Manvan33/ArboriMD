@@ -88,7 +88,7 @@ label {
 
 .right {
     float: right;
-    margin-right: px;
+    margin-right: 1px;
 }
 
 #add_note_dialog {
@@ -153,7 +153,8 @@ label {
     border-bottom: 1px dotted #AAA;
 }
 
-#folder_template {
+#folder_template,
+#note_link_template {
     display: none;
 }
 
@@ -231,7 +232,7 @@ iframe {
 
 .note-link {
     list-style-type: none;
-    margin: 4px 0 2px 8px;
+    margin: 4px 10px 2px 8px;
     white-space: nowrap;
     cursor: pointer;
 }
@@ -246,6 +247,21 @@ iframe {
 
 .note-link.found {
     color: aquamarine;
+}
+
+.note-link .note_delete {
+    opacity: 0;
+    color: red;
+    position: absolute;
+    left: calc(var(--aside-width-current) - 22px);
+    cursor: not-allowed;
+    width: 20px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.note-link:hover .note_delete {
+    opacity: 1;
 }
 
 @media screen and (max-width: 800px) {

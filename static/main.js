@@ -129,7 +129,7 @@ function loadList() {
             }
             let root = document.querySelector('#arbolist');
             root.innerHTML = "";
-            Object.keys(data).forEach(folder => {
+            Object.keys(data).sort().forEach(folder => {
                 root.appendChild(createFolder(folder, data[folder]));
             });
         });
@@ -155,7 +155,7 @@ function closeAllFolders() {
 
 // Function to copy the link to the current note
 function copy_link() {
-    let link_content = document.querySelector('#codimd').src;
+    let link_content = get_iframe_href();
     tmp_input = document.createElement('input');
     tmp_input.value = link_content;
     tmp_input.style.position = 'absolute';
@@ -187,6 +187,8 @@ function createFolder(name, data) {
         folder.open = true;
     }
     let ul = document.createElement('ul');
+    // sort the notes by title
+    data = data.sort((a, b) => { return a.title.localeCompare(b.title) });
     data.forEach(note => {
         ul.appendChild(note_link(note));
     });
@@ -196,19 +198,25 @@ function createFolder(name, data) {
 
 // Function to create a note entry
 function note_link(note) {
-    let li = document.createElement('li');
-    li.innerText = note.title;
-    li.classList.add("note-link");
-    li.setAttribute("id", note.id);
+    let node = document.querySelector("#note_link_template").cloneNode(true);
+    node.querySelector(".note_title").innerText = note.title;
+    node.setAttribute("note_id", note.id);
     if (note.id == state.getSelected()) {
-        li.classList.add("selected");
-        li.scrollIntoView();
+        node.classList.add("selected");
+        node.scrollIntoView();
     }
-    li.addEventListener("click", event => {
+    node.addEventListener("click", event => {
         event.target.classList.add("selected");
         open_note(CODIMD_URL + note.id + "?edit");
     });
-    return li;
+    node.querySelector(".note_delete").addEventListener("click", event => {
+        event.stopPropagation();
+        if (confirm('Are you sure you want to delete "' + note.title + '" ?')) {
+            delete_note(note.id);
+        }
+    });
+    node.style.display = "block";
+    return node;
 }
 
 // Function to open a note
@@ -245,7 +253,7 @@ function refresh_current() {
 }
 
 function add_note_dialog() {
-    let actual_note_url = document.querySelector('#codimd').src;
+    let actual_note_url = get_iframe_href();
     document.querySelector('#add_note_url').value = actual_note_url;
     document.querySelector("#add_note_dialog").classList.remove("hidden");
 }
@@ -279,4 +287,27 @@ function clearResults() {
 
 function clickFirstResult() {
     document.querySelectorAll(".found")[0].click();
+}
+
+function delete_note(id) {
+    if (state.getSelected() == id) {
+        document.querySelector('#codimd').src = CODIMD_URL;
+        state.setSelected(null);
+    }
+    fetch("/delete/" + id).then(response => {
+        if (response.status == 200) {
+            console.log("Deleted note " + id);
+        } else {
+            console.log("Failed to delete note " + id);
+        }
+        loadList();
+    });
+}
+
+function get_iframe_href() {
+    try {
+        return document.querySelector('#codimd').contentWindow.location.href;
+    } catch (e) {
+        return document.querySelector('#codimd').src;
+    }
 }

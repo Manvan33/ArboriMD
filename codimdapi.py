@@ -7,10 +7,10 @@ class CodimdAPI:
         self.url = url
         self.email = email
         self.password = password
+        self.session = requests.Session()
 
     def login(self):
-        self.session = requests.Session()
-        res = self.session.post(self.url + "login", data={
+        self.session.post(self.url + "login", data={
             "email": self.email, "password": self.password}, headers={"Referer": self.url})
 
     def logged_in_request(self, method, url, return_redirect=False):
