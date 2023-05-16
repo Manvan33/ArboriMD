@@ -1,6 +1,7 @@
 import requests
 from flask_login import UserMixin
 
+
 class User(UserMixin):
     def __init__(self, username):
         self.username = username
@@ -17,6 +18,7 @@ class User(UserMixin):
     @staticmethod
     def get_user(name):
         return User(name)
+
 
 class OIDC:
     def __init__(self, discovery_url, client_id, client_secret):
@@ -40,7 +42,8 @@ class OIDC:
             'code': code,
             'redirect_uri': redirect_url
         }
-        response = requests.post(url=self.token_endpoint, data=payload)#,proxies={"http": "127.0.0.1:8080", "https": "127.0.0.1:8080"}, verify=False)
+        # ,proxies={"http": "127.0.0.1:8080", "https": "127.0.0.1:8080"}, verify=False)
+        response = requests.post(url=self.token_endpoint, data=payload)
         if not response.status_code == 200:
             return False, "Code validation failed"
         response = response.json()
@@ -50,7 +53,8 @@ class OIDC:
             'client_id': self.client_id,
             'client_secret': self.client_secret
         }
-        response = requests.post(url=self.introspection_endpoint, data=payload2)
+        response = requests.post(
+            url=self.introspection_endpoint, data=payload2)
         if not response.status_code == 200:
             return False, "Instrospection failed"
         return True, response.json()["preferred_username"]

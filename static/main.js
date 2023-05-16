@@ -1,68 +1,58 @@
+let latest_list = null;
 
-function getFromCookie(key) {
-    let cookies = document.cookie.split(";");
-    for (let i = 0; i < cookies.length; i++) {
-        let cookie = cookies[i].trim();
-        if (cookie.startsWith(key + "=")) {
-            return cookie.slice(key.length + 1);
+class Note {
+    static notes = {};
+
+    constructor(id, title, folder) {
+        if (id in Object.keys(Note.notes)) {
+            return Note.notes[id];
         }
+        Note.notes[id] = this;
+        this.title = title;
+        this.id = id;
+        this.folder = folder;
+        this.element = document.createElement('li');
+        this.build();
     }
-    return null;
-}
 
-let latest_list = {};
-
-class State {
-    constructor() {
-        this.state = JSON.parse(getFromCookie("state"));
-        if (this.state == null) {
-            this.state = {
-                "opened": [],
-                "selected": null
+    // Function to create a note entry
+    build() {
+        this.element.innerText = this.title;
+        this.element.classList.add("note-link");
+        this.element.setAttribute("id", this.id);
+        if (this.id == state.getSelected()) {
+            this.element.classList.add("selected");
+            this.element.scrollIntoView();
+        }
+        this.element.addEventListener("click", event => {
+            event.target.classList.add("selected");
+            this.open();
+        });
+        this.folder.element.querySelector(".notes_list").appendChild(this.element);
+    }
+    open() {
+        let url = CODIMD_URL + this.id + "?edit";
+        // Check if the note is already open
+        if (document.querySelector('#codimd').src == url) {
+            return;
+        }
+        refresh_current();
+        document.querySelector('#codimd').src = url;
+        fetch("/refresh/" + this.id).then(response => {
+            if (response.status == 200) {
+                console.log("Refreshed note " + this.id);
+            } else {
+                console.log("Failed to refresh note " + this.id);
             }
-        }
-        this.storeState();
-    }
-
-    loadState() {
-        this.state = JSON.parse(getFromCookie("state"));
-        return this.state;
-    }
-
-    storeState() {
-        document.cookie = "state=" + JSON.stringify(this.state);
-    }
-
-    getSelected() {
-        return this.loadState().selected;
-    }
-
-    getOpened() {
-        return this.loadState().opened;
-    }
-    clearOpened() {
-        this.state.opened = [];
-        this.storeState();
-    }
-    addOpened(folder) {
-        this.loadState().opened.push(folder);
-        this.storeState();
-    }
-
-    setSelected(id) {
-        this.loadState().selected = id;
-        this.storeState();
-    }
-
-    removeOpened(folder) {
-        let opened = this.loadState().opened;
-        opened.splice(opened.indexOf(folder), 1);
-        this.storeState();
+            state.setSelected(this.id);
+            loadList();
+            // Change url without reloading
+            history.pushState({}, "", "/" + this.id);
+        });
     }
 }
 
 let state = null;
-
 function toggle_aside() {
     // Get the root element
     var r = document.querySelector(':root');
@@ -128,13 +118,33 @@ function loadList() {
                 return;
             }
             let root = document.querySelector('#arbolist');
-            root.innerHTML = "";
             Object.keys(data).forEach(folder => {
-                root.appendChild(createFolder(folder, data[folder]));
+                new Folder(folder, null, data[folder]);
             });
+            applyState();
         });
 }
 
+function applyState() {
+    let opened = state.getOpened();
+    document.querySelectorAll("#arbolist details").forEach(details => {
+        let title = details.querySelector(".title").innerText;
+        if (opened.has(title)) {
+            details.open = true;
+        } else {
+            details.open = false;
+        }
+    });
+    let selected = state.getSelected();
+    document.querySelectorAll(".note-link").forEach(link => {
+        if (link.getAttribute("note_id") == selected) {
+            link.classList.add("selected");
+            //link.scrollIntoView();
+        } else {
+            link.classList.remove("selected");
+        }
+    });
+}
 
 // Function to open all folders
 function openAllFolders() {
@@ -166,45 +176,18 @@ function copy_link() {
     alert("Link copied to clipboard");
 }
 
-// Function to create a folder 
-function createFolder(name, data) {
-    // Clone the node
-    let folder = document.querySelector("#folder_template").cloneNode(true);
-    folder.removeAttribute("id");
-    let summary = folder.querySelector('summary');
-    let title = folder.querySelector(".title");
-    title.innerText = name;
-    folder.appendChild(summary);
-    summary.addEventListener("click", event => {
-        refresh_current();
-        if (folder.open) {
-            state.removeOpened(name);
-        } else {
-            state.addOpened(name);
-        }
-    });
-    if (state.getOpened().includes(name)) {
-        folder.open = true;
-    }
-    let ul = document.createElement('ul');
-    data.forEach(note => {
-        ul.appendChild(note_link(note));
-    });
-    folder.appendChild(ul);
-    return folder;
-}
 
 // Function to create a note entry
 function note_link(note) {
     let li = document.createElement('li');
-    li.innerText = note.title;
-    li.classList.add("note-link");
-    li.setAttribute("id", note.id);
+    this.element.innerText = note.title;
+    this.element.classList.add("note-link");
+    this.element.setAttribute("id", note.id);
     if (note.id == state.getSelected()) {
-        li.classList.add("selected");
-        li.scrollIntoView();
+        this.element.classList.add("selected");
+        this.element.scrollIntoView();
     }
-    li.addEventListener("click", event => {
+    this.element.addEventListener("click", event => {
         event.target.classList.add("selected");
         open_note(CODIMD_URL + note.id + "?edit");
     });

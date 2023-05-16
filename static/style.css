@@ -187,23 +187,27 @@ details>summary {
     margin: 8px 0;
 }
 
+details {
+    padding-left: 10px;
+}
+
 details[open]>summary {
     cursor: n-resize;
 }
 
-details[open] .opened {
+details[open]>summary>.opened {
     display: initial;
 }
 
-details[open] .closed {
+details[open]>summary>.closed {
     display: none;
 }
 
-details .opened {
+details>summary>.opened {
     display: none;
 }
 
-details .closed {
+details>summary>.closed {
     display: initial;
 }
 
