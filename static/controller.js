@@ -1,55 +1,19 @@
 let latest_list = null;
 
-class Note {
-    static notes = {};
-
-    constructor(id, title, folder) {
-        if (id in Object.keys(Note.notes)) {
-            return Note.notes[id];
+function create_folders(data) {
+    for (data.name in data) {
+        if (data.name.includes("/")) {
+            // Split into subfolders
+            let parent_folder = new Folder(data.name.split("/")[0], data.parent, []);
+            let subfolder = new Folder(data.name.split("/")[1], parent_folder, data);
+            this.children.push(subfolder);
+        } else {
+            let folder = new Folder(data.name, data.parent, data);
         }
-        Note.notes[id] = this;
-        this.title = title;
-        this.id = id;
-        this.folder = folder;
-        this.element = document.createElement('li');
-        this.build();
     }
-
-    // Function to create a note entry
-    build() {
-        this.element.innerText = this.title;
-        this.element.classList.add("note-link");
-        this.element.setAttribute("id", this.id);
-        if (this.id == state.getSelected()) {
-            this.element.classList.add("selected");
-            this.element.scrollIntoView();
-        }
-        this.element.addEventListener("click", event => {
-            event.target.classList.add("selected");
-            this.open();
-        });
-        this.folder.element.querySelector(".notes_list").appendChild(this.element);
-    }
-    open() {
-        let url = CODIMD_URL + this.id + "?edit";
-        // Check if the note is already open
-        if (document.querySelector('#codimd').src == url) {
-            return;
-        }
-        refresh_current();
-        document.querySelector('#codimd').src = url;
-        fetch("/refresh/" + this.id).then(response => {
-            if (response.status == 200) {
-                console.log("Refreshed note " + this.id);
-            } else {
-                console.log("Failed to refresh note " + this.id);
-            }
-            state.setSelected(this.id);
-            loadList();
-            // Change url without reloading
-            history.pushState({}, "", "/" + this.id);
-        });
-    }
+}
+function updateFolder(e) {
+    console.log(e);
 }
 
 let state = null;

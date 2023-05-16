@@ -87,7 +87,7 @@
             </div>
         </div>
         <details id="folder_template">
-            <summary>
+            <summary onclick="updateFolder(this)">
                 <svg class="closed" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                     class="bi bi-folder" viewBox="0 0 16 16">
                     <path
@@ -111,8 +111,9 @@
         let CODIMD_URL = "{{ url }}"
         let NOTE_TO_OPEN = "{{ note_id }}"
     </script>
-    <script src="/static/state.js"></script>
-    <script src="/static/main.js"></script>
+    <script src="/static/model.js"></script>
+    <script src="/static/view.js"></script>
+    <script src="/static/controller.js"></script>
 </body>
 
 </html>
