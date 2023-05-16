@@ -1,7 +1,6 @@
 import json
 
 from flask import Flask, render_template, request, redirect, url_for
-from secrets import token_hex
 from os import getenv
 from dotenv import load_dotenv
 from flask_login import LoginManager, login_user, current_user
@@ -17,6 +16,7 @@ CODIMD_PASSWORD = getenv("CODIMD_PASSWORD")
 LOGIN_DISABLED = getenv("LOGIN_DISABLED", False) == "True"
 # Optional variables for OIDC login
 if not LOGIN_DISABLED:
+    print("Login enabled")
     OIDC_CLIENT_ID = getenv("OIDC_CLIENT_ID")
     OIDC_CLIENT_SECRET = getenv("OIDC_CLIENT_SECRET")
     OIDC_DISCOVERY_URL = getenv("OIDC_DISCOVERY_URL")
@@ -26,18 +26,21 @@ if not LOGIN_DISABLED:
     else:
         oidc_tool = OIDC(OIDC_DISCOVERY_URL,
                          OIDC_CLIENT_ID, OIDC_CLIENT_SECRET)
+else:
+    print("Login disabled")
 
 # Necessary variables
 if not CODIMD_URL or not CODIMD_EMAIL or not CODIMD_PASSWORD:
     print("Please set CODIMD_URL, CODIMD_EMAIL and CODIMD_PASSWORD in .env")
     exit(1)
 
+
 # Initialize Flask app
 app = Flask(__name__, static_folder="static", template_folder="templates")
 # flask_login will use this to disable login if needed
 app.config["LOGIN_DISABLED"] = LOGIN_DISABLED
-SECRET_KEY = getenv("SECRET_KEY")
-app.secret_key = SECRET_KEY or token_hex(16)
+if not LOGIN_DISABLED:
+    app.secret_key = SECRET_KEY
 
 # Initialize flask_login
 login_manager = LoginManager()
@@ -63,16 +66,17 @@ def check_login():
 # Initialize CodimdAPI
 codimd = CodimdAPI(CODIMD_URL, CODIMD_EMAIL, CODIMD_PASSWORD)
 
+
 # Converts a codimd history entry to a dict of tag-folders (keys) and notes (values)
-
-
-def restructure_entry(entry): return {
-    "id": entry["id"], "title": entry["text"], "timestamp": entry["time"]}
+def restructure_entry(entry):
+    # return {"id": entry["id"], "title": entry["text"], "timestamp": entry["time"]}
+    return {"id": entry["id"], "title": entry["text"]}
 
 
 @app.route('/')
 def index():
     return render_template('index.html', url=CODIMD_URL, note_id="")
+
 
 # Load a note from the URL
 
@@ -81,22 +85,23 @@ def index():
 def index_with_note(note_id):
     return render_template('index.html', url=CODIMD_URL, note_id=note_id+"?"+request.query_string.decode("utf-8"))
 
+
 # Returns all notes from history
 
 
 @app.route('/list')
-def list() -> json:
-    list = {"unsorted": []}
+def notes_list() -> json:
+    notes = {"unsorted": []}
     data = codimd.get_history()
     for entry in data['history']:
         if entry['tags']:
             for tag in entry['tags']:
-                if tag not in list:
-                    list[tag] = []
-                list[tag].append(restructure_entry(entry))
+                if tag not in notes:
+                    notes[tag] = []
+                notes[tag].append(restructure_entry(entry))
         else:
-            list['unsorted'].append(restructure_entry(entry))
-    return list
+            notes['unsorted'].append(restructure_entry(entry))
+    return notes
 
 
 @app.route('/refresh/<note_id>')
@@ -135,5 +140,9 @@ def oidc():
     return redirect(request.args.get("next"))
 
 
-if __name__ == '__main__':
+def main():
     app.run(debug=True, host='0.0.0.0')
+
+
+if __name__ == '__main__':
+    main()
