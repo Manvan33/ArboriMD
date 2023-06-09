@@ -248,12 +248,15 @@ iframe {
 .note-link.found {
     color: aquamarine;
 }
+.note-link .note_title {
+    display: inline-block;
+    width:90%;
+    overflow: clip;
+}
 
 .note-link .note_delete {
     opacity: 0;
     color: red;
-    position: absolute;
-    left: calc(var(--aside-width-current) - 22px);
     cursor: not-allowed;
     width: 20px;
     text-align: center;
