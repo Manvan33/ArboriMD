@@ -91,17 +91,40 @@ def index_with_note(note_id):
 
 @app.route('/list')
 def notes_list() -> json:
-    notes = {"unsorted": []}
+    folders = [
+        {"folder_name": "unsorted", "notes": []}
+    ]
     data = codimd.get_history()
     for entry in data['history']:
+        # If the note has tags, add it to the corresponding tag-folder
         if entry['tags']:
             for tag in entry['tags']:
-                if tag not in notes:
-                    notes[tag] = []
+                pointer = notes
+                # If the tag contains a slash, create a subfolder
+                for subfolder in tag.split("/"):
+                    pointer["children"] = {
+                        "type": "folder",
+                        "name": subfolder,
+                        "children": []
+                    }
+                    pointer = pointer["children"]
+                pointer.append(restructure_entry(entry))
                 notes[tag].append(restructure_entry(entry))
+        # Else, add it to the unsorted folder
         else:
             notes['unsorted'].append(restructure_entry(entry))
     return notes
+
+
+def folder_entry(folder_name: str, children: list):
+    return {
+        "type": "folder",
+        "name": folder_name,
+        "children": children
+    }
+
+
+def parse_subfolders(name: str):
 
 
 @app.route('/refresh/<note_id>')

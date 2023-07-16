@@ -58,6 +58,8 @@ class State {
     }
 }
 
+let state = new State();
+
 class Folder {
     static folders = {};
     constructor(name, parent, notes) {
@@ -95,6 +97,13 @@ class Folder {
         }
         this.view.render();
     }
+    update_folder(parent, data) {
+        if (this.parent != parent) {
+            this.parent = parent;
+            this.view.render();
+        }
+
+    }
 }
 
 class Note {
@@ -110,40 +119,12 @@ class Note {
         this.folder = folder;
         this.view = new NoteView(this);
     }
-
-    // Function to create a note entry
-    build() {
-        this.element.innerText = this.title;
-        this.element.classList.add("note-link");
-        this.element.setAttribute("id", this.id);
-        if (this.id == state.getSelected()) {
-            this.element.classList.add("selected");
-            this.element.scrollIntoView();
-        }
-        this.element.addEventListener("click", event => {
-            event.target.classList.add("selected");
-            this.open();
+    select() {
+        Note.notes.forEach(note => {
+            note.selected = false;
         });
-        this.folder.element.querySelector(".notes_list").appendChild(this.element);
-    }
-    open() {
-        let url = CODIMD_URL + this.id + "?edit";
-        // Check if the note is already open
-        if (document.querySelector('#codimd').src == url) {
-            return;
-        }
-        refresh_current();
-        document.querySelector('#codimd').src = url;
-        fetch("/refresh/" + this.id).then(response => {
-            if (response.status == 200) {
-                console.log("Refreshed note " + this.id);
-            } else {
-                console.log("Failed to refresh note " + this.id);
-            }
-            state.setSelected(this.id);
-            loadList();
-            // Change url without reloading
-            history.pushState({}, "", "/" + this.id);
-        });
+        this.selected = true;
+        this.view.render();
+        state.setSelected(this.id);
     }
 }
