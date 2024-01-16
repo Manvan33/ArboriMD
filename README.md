@@ -20,7 +20,7 @@ Create a file called `.env` and add the following:
 
 ```bash
 cat << EOF > .env
-CODIMD_FQDN=yourcodimdserver.com
+CODIMD_URL=https://yourcodimdserver.com/
 CODIMD_EMAIL=your@mail.com
 CODIMD_PASSWORD=yourpassword
 EOF
@@ -41,7 +41,7 @@ Otherwise, you have to disable login
     
 ```bash
 cat << EOF >> .env
-DISABLE_LOGIN=true
+LOGIN_DISABLED=true
 EOF
 ```
 
