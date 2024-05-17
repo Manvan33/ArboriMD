@@ -98,3 +98,9 @@ server {
     ssl_certificate_key /etc/letsencrypt/live/a.notes.rezel.net/privkey.pem; # managed by Certbot
 }
 ```
+
+## Docker 
+
+A `Dockerfile` and a `docker-compose.yml` files are provided.
+
+To run with docker, be sure to have created a `.env` file as described above and run using `docker compose up -d`.
