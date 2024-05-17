@@ -2,14 +2,14 @@ import json
 
 from flask import Flask, render_template, request, redirect, url_for
 from os import getenv
-#from dotenv import load_dotenv
+from dotenv import load_dotenv
 from flask_login import LoginManager, login_user, current_user
 
 from codimdapi import CodimdAPI
 from oidc import User, OIDC
 
 # Loading environment variables
-#load_dotenv()
+load_dotenv()
 CODIMD_URL = getenv("CODIMD_URL")
 CODIMD_EMAIL = getenv("CODIMD_EMAIL")
 CODIMD_PASSWORD = getenv("CODIMD_PASSWORD")
