@@ -41,7 +41,7 @@ Otherwise, you have to disable login
     
 ```bash
 cat << EOF >> .env
-LOGIN_DISABLED=true
+LOGIN_DISABLED=True
 EOF
 ```
 
