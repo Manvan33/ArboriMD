@@ -1,6 +1,6 @@
 import json
 
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, send_file
 from os import getenv, path, makedirs, remove
 from dotenv import load_dotenv
 from flask_login import LoginManager, login_user, current_user
@@ -18,7 +18,7 @@ LOGIN_DISABLED = getenv("LOGIN_DISABLED", False) == "True"
 HTTP_PROXY = getenv("HTTP_PROXY")
 # Optional variables for OIDC login
 if not LOGIN_DISABLED:
-    print("Login enabled")
+    # print("Login enabled")
     OIDC_CLIENT_ID = getenv("OIDC_CLIENT_ID")
     OIDC_CLIENT_SECRET = getenv("OIDC_CLIENT_SECRET")
     OIDC_DISCOVERY_URL = getenv("OIDC_DISCOVERY_URL")
@@ -29,8 +29,8 @@ if not LOGIN_DISABLED:
     else:
         oidc_tool = OIDC(OIDC_DISCOVERY_URL,
                          OIDC_CLIENT_ID, OIDC_CLIENT_SECRET, proxy=HTTP_PROXY)
-else:
-    print("Login disabled")
+# else:
+    # print("Login disabled")
 
 # Necessary variables
 if not CODIMD_URL or not CODIMD_EMAIL or not CODIMD_PASSWORD:
@@ -74,6 +74,31 @@ codimd = CodimdAPI(CODIMD_URL, CODIMD_EMAIL, CODIMD_PASSWORD, proxy=HTTP_PROXY)
 def restructure_entry(entry):
     # return {"id": entry["id"], "title": entry["text"], "timestamp": entry["time"]}
     return {"id": entry["id"], "title": entry["text"]}
+
+
+def generate_backup_file(backup_location):
+    BACKUP_FILENAME = "notes_backup"
+    output_folder = path.join(app.static_folder, "downloads")
+    backup_file = path.join(backup_location, BACKUP_FILENAME + ".zip")
+    if path.exists(output_folder):
+        rmtree(output_folder)
+    if path.exists(backup_file):
+        remove(backup_file)
+    notes_folder = path.join(output_folder, "notes")
+    makedirs(notes_folder, exist_ok=True)
+    notes = codimd.get_history()
+    with open(path.join(output_folder, "README.md"), "w") as index_file:
+        index_file.write("# Notes")
+        for folder, entries in notes_list().items():
+            index_file.write(f"\n\n## {folder}\n\n")
+            for entry in entries:
+                index_file.write(
+                    f"- [{entry['title']}](notes/{entry['id']}.md)\n")
+    for entry in notes['history']:
+        note_id = entry['id']
+        with open(path.join(notes_folder, note_id+".md"), "wb") as f:
+            f.write(codimd.download_note(note_id))
+    return make_archive(backup_file[:-4], 'zip', output_folder)
 
 
 @app.route('/')
@@ -141,30 +166,8 @@ def oidc():
 
 @app.route('/backup')
 def backup():
-    output_folder = path.join(app.static_folder, "downloads")
-    BACKUP_FILENAME = "notes_backup"
-    backup_file = path.join(app.static_folder, BACKUP_FILENAME+".zip")
-    if path.exists(output_folder):
-        rmtree(output_folder)
-    if path.exists(backup_file):
-        remove(backup_file)
-    notes_folder = path.join(output_folder, "notes")
-    makedirs(notes_folder, exist_ok=True)
-    notes = codimd.get_history()
-    with open(path.join(output_folder, "README.md"), "w") as index_file:
-        index_file.write("# Notes")
-        for folder, entries in notes_list().items():
-            index_file.write(f"\n\n## {folder}\n\n")
-            for entry in entries:
-                index_file.write(
-                    f"- [{entry['title']}](notes/{entry['id']}.md)\n")
-    for entry in notes['history']:
-        note_id = entry['id']
-        with open(path.join(notes_folder, note_id+".md"), "wb") as f:
-            f.write(codimd.download_note(note_id))
-    make_archive(backup_file[:-4],
-                 'zip', output_folder)
-    return app.send_static_file(BACKUP_FILENAME+".zip")
+    backup_filename = generate_backup_file(app.static_folder)
+    return send_file(backup_filename, as_attachment=True)
 
 
 def main():
