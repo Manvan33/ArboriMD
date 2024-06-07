@@ -126,3 +126,5 @@ $ python -c 'from main import generate_backup_file; print(generate_backup_file("
 ```
 
 The function returns the path to the backup file.
+
+An example is provided in `backup_to_git.sh`.
