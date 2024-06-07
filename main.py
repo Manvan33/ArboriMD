@@ -1,3 +1,4 @@
+import datetime
 import json
 
 from flask import Flask, render_template, request, redirect, url_for, send_file
@@ -76,6 +77,12 @@ def restructure_entry(entry):
     return {"id": entry["id"], "title": entry["text"]}
 
 
+def notes_index():
+    today = datetime.datetime.now().strftime("%Y-%m-%d")
+    return render_template('notes_index.md', notes=notes_list(),
+                           backup_date=today, site_hostname=CODIMD_URL, site_url=CODIMD_URL)
+
+
 def generate_backup_file(backup_location):
     BACKUP_FILENAME = "notes_backup"
     output_folder = path.join(app.static_folder, "downloads")
@@ -88,12 +95,7 @@ def generate_backup_file(backup_location):
     makedirs(notes_folder, exist_ok=True)
     notes = codimd.get_history()
     with open(path.join(output_folder, "README.md"), "w") as index_file:
-        index_file.write("# Notes")
-        for folder, entries in notes_list().items():
-            index_file.write(f"\n\n## {folder}\n\n")
-            for entry in entries:
-                index_file.write(
-                    f"- [{entry['title']}](notes/{entry['id']}.md)\n")
+        index_file.write(notes_index())
     for entry in notes['history']:
         note_id = entry['id']
         with open(path.join(notes_folder, note_id+".md"), "wb") as f:
