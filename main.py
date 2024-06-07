@@ -1,5 +1,5 @@
-import datetime
 import json
+import jinja2
 
 from flask import Flask, render_template, request, redirect, url_for, send_file
 from os import getenv, path, makedirs, remove
@@ -37,7 +37,6 @@ if not LOGIN_DISABLED:
 if not CODIMD_URL or not CODIMD_EMAIL or not CODIMD_PASSWORD:
     print("Please set CODIMD_URL, CODIMD_EMAIL and CODIMD_PASSWORD in .env")
     exit(1)
-
 
 # Initialize Flask app
 app = Flask(__name__, static_folder="static", template_folder="templates")
@@ -78,9 +77,9 @@ def restructure_entry(entry):
 
 
 def notes_index():
-    today = datetime.datetime.now().strftime("%Y-%m-%d")
-    return render_template('notes_index.md', notes=notes_list(),
-                           backup_date=today, site_hostname=CODIMD_URL, site_url=CODIMD_URL)
+    with open('./templates/notes_index.md') as template_file:
+        template = jinja2.Template(template_file.read())
+    return template.render(notes=notes_list(), site_hostname=CODIMD_URL, site_url=CODIMD_URL)
 
 
 def generate_backup_file(backup_location):
