@@ -35,7 +35,7 @@ BACKUP_FILE=`python -c 'from main import generate_backup_file; print(generate_ba
 # Update the git repository
 git -C $TARGET_FOLDER pull
 # Extract the backup file
-tar -xzf $BACKUP_FILE -C $TARGET_FOLDER
+unzip $BACKUP_FILE -d $TARGET_FOLDER
 # Add the extracted files to the git repository
 git -C $TARGET_FOLDER add .
 # Commit the changes
