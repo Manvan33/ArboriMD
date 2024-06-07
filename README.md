@@ -113,3 +113,16 @@ server {
 A `Dockerfile` and a `docker-compose.yml` files are provided.
 
 To run with docker, be sure to have created a `.env` file as described above and run using `docker compose up -d`.
+
+## Backup
+
+You can download a backup of all notes by using the `/backup` endpoint.
+
+If you want to do it programmatically, bypassing authentication, you can call the function manually:
+
+```bash
+$ python -c 'from main import generate_backup_file; print(generate_backup_file("/my/backup/location/"))'
+/my/backup/location/notes_backup.zip
+```
+
+The function returns the path to the backup file.
