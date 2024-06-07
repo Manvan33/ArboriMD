@@ -21,7 +21,7 @@ class User(UserMixin):
 
 
 class OIDC:
-    def __init__(self, discovery_url, client_id, client_secret):
+    def __init__(self, discovery_url, client_id, client_secret, proxy=None):
         self.discovery_url = discovery_url
         self.client_id = client_id
         self.client_secret = client_secret
@@ -29,6 +29,9 @@ class OIDC:
         self.token_endpoint = self.oidc_config["token_endpoint"]
         self.authorization_endpoint = self.oidc_config["authorization_endpoint"]
         self.introspection_endpoint = self.oidc_config["introspection_endpoint"]
+        self.session = requests.Session()
+        if proxy:
+            self.session.proxies = {"http": proxy, "https": proxy}
 
     def get_auth_url(self, redirect_url):
         return self.authorization_endpoint + "?client_id=" + self.client_id + "&response_type=code&scope=openid&redirect_uri=" + redirect_url
@@ -42,7 +45,7 @@ class OIDC:
             'code': code,
             'redirect_uri': redirect_url
         }
-        response = requests.post(url=self.token_endpoint, data=payload) #,proxies={"http": "127.0.0.1:8080", "https": "127.0.0.1:8080"}, verify=False)
+        response = self.session.post(url=self.token_endpoint, data=payload)
         if not response.status_code == 200:
             return False, "Code validation failed"
         response = response.json()
@@ -52,7 +55,8 @@ class OIDC:
             'client_id': self.client_id,
             'client_secret': self.client_secret
         }
-        response = requests.post(url=self.introspection_endpoint, data=payload2)
+        response = self.session.post(
+            url=self.introspection_endpoint, data=payload2)
         if not response.status_code == 200:
             return False, "Instrospection failed"
         return True, response.json()["preferred_username"]

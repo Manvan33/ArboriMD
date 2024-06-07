@@ -2,11 +2,13 @@ import requests
 
 
 class CodimdAPI:
-    def __init__(self, url, email, password):
+    def __init__(self, url, email, password, proxy=None):
         self.url = url
         self.email = email
         self.password = password
         self.session = requests.Session()
+        if proxy:
+            self.session.proxies = {"http": proxy, "https": proxy}
         self.login()
 
     def login(self):

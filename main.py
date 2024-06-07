@@ -14,6 +14,7 @@ CODIMD_URL = getenv("CODIMD_URL")
 CODIMD_EMAIL = getenv("CODIMD_EMAIL")
 CODIMD_PASSWORD = getenv("CODIMD_PASSWORD")
 LOGIN_DISABLED = getenv("LOGIN_DISABLED", False) == "True"
+HTTP_PROXY = getenv("HTTP_PROXY")
 # Optional variables for OIDC login
 if not LOGIN_DISABLED:
     print("Login enabled")
@@ -26,7 +27,7 @@ if not LOGIN_DISABLED:
             "OIDC_CLIENT_ID, OIDC_CLIENT_SECRET, OIDC_DISCOVERY_URL and SECRET_KEY must be set. Otherwise set LOGIN_DISABLED to True")
     else:
         oidc_tool = OIDC(OIDC_DISCOVERY_URL,
-                         OIDC_CLIENT_ID, OIDC_CLIENT_SECRET)
+                         OIDC_CLIENT_ID, OIDC_CLIENT_SECRET, proxy=HTTP_PROXY)
 else:
     print("Login disabled")
 
@@ -65,7 +66,7 @@ def check_login():
 
 
 # Initialize CodimdAPI
-codimd = CodimdAPI(CODIMD_URL, CODIMD_EMAIL, CODIMD_PASSWORD)
+codimd = CodimdAPI(CODIMD_URL, CODIMD_EMAIL, CODIMD_PASSWORD, proxy=HTTP_PROXY)
 
 
 # Converts a codimd history entry to a dict of tag-folders (keys) and notes (values)
