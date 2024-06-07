@@ -22,9 +22,11 @@ if not LOGIN_DISABLED:
     OIDC_DISCOVERY_URL = getenv("OIDC_DISCOVERY_URL")
     SECRET_KEY = getenv("SECRET_KEY")
     if not OIDC_CLIENT_ID or not OIDC_CLIENT_SECRET or not OIDC_DISCOVERY_URL or not SECRET_KEY:
-        raise ValueError("OIDC_CLIENT_ID, OIDC_CLIENT_SECRET, OIDC_DISCOVERY_URL and SECRET_KEY must be set. Otherwise set LOGIN_DISABLED to True")
+        raise ValueError(
+            "OIDC_CLIENT_ID, OIDC_CLIENT_SECRET, OIDC_DISCOVERY_URL and SECRET_KEY must be set. Otherwise set LOGIN_DISABLED to True")
     else:
-        oidc_tool = OIDC(OIDC_DISCOVERY_URL, OIDC_CLIENT_ID, OIDC_CLIENT_SECRET)
+        oidc_tool = OIDC(OIDC_DISCOVERY_URL,
+                         OIDC_CLIENT_ID, OIDC_CLIENT_SECRET)
 else:
     print("Login disabled")
 
@@ -37,7 +39,7 @@ if not CODIMD_URL or not CODIMD_EMAIL or not CODIMD_PASSWORD:
 # Initialize Flask app
 app = Flask(__name__, static_folder="static", template_folder="templates")
 # flask_login will use this to disable login if needed
-app.config["LOGIN_DISABLED"] = LOGIN_DISABLED 
+app.config["LOGIN_DISABLED"] = LOGIN_DISABLED
 if not LOGIN_DISABLED:
     app.secret_key = SECRET_KEY
 
@@ -117,14 +119,16 @@ def delete(note_id):
 @app.route('/login')
 def login():
     if app.config["LOGIN_DISABLED"]:
-        return redirect(url_for('index')+ "?" + request.query_string.decode("utf-8"))
-    redirect_url = url_for("oidc", _external=True) + "?" + request.query_string.decode("utf-8")
+        return redirect(url_for('index') + "?" + request.query_string.decode("utf-8"))
+    redirect_url = url_for("oidc", _external=True) + \
+        "?" + request.query_string.decode("utf-8")
     return redirect(oidc_tool.get_auth_url(redirect_url))
 
 
 @app.route("/oidc")
 def oidc():
-    redirect_url = url_for('oidc', _external=True)+ "?next=" + request.args.get("next")
+    redirect_url = url_for('oidc', _external=True) + \
+        "?next=" + request.args.get("next")
     auth_code = request.args.get("code")
     ok, username = oidc_tool.validate_code(auth_code, redirect_url)
     if not ok:
