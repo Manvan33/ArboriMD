@@ -1,6 +1,4 @@
 # Backup from {{ site_hostname }}
-
-_Backup created automatically on {{ backup_date }}_
 {% for folder, entries in notes.items() %}
 ## {{ folder }}
 {% for entry in entries %}
