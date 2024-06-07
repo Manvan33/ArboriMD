@@ -38,12 +38,21 @@ EOF
 ```
 
 Otherwise, you have to disable login
-    
+
 ```bash
 cat << EOF >> .env
 LOGIN_DISABLED=True
 EOF
 ```
+
+If you want ArboriMD to use a proxy to access CodiMD and your OIDC server, add the following to `.env`:
+
+```bash
+cat << EOF >> .env
+HTTP_PROXY="http://yourproxy:port"
+```
+
+The same proxy is used for HTTP and HTTPS.
 
 ## Usage
 
@@ -99,7 +108,7 @@ server {
 }
 ```
 
-## Docker 
+## Docker
 
 A `Dockerfile` and a `docker-compose.yml` files are provided.
 
