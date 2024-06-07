@@ -1,9 +1,10 @@
 import json
 
 from flask import Flask, render_template, request, redirect, url_for
-from os import getenv
+from os import getenv, path, makedirs, remove
 from dotenv import load_dotenv
 from flask_login import LoginManager, login_user, current_user
+from shutil import make_archive, rmtree
 
 from codimdapi import CodimdAPI
 from oidc import User, OIDC
@@ -136,6 +137,34 @@ def oidc():
         return "Error: "+username, 400
     login_user(User.get_user(username), remember=True)
     return redirect(request.args.get("next"))
+
+
+@app.route('/backup')
+def backup():
+    output_folder = path.join(app.static_folder, "downloads")
+    BACKUP_FILENAME = "notes_backup"
+    backup_file = path.join(app.static_folder, BACKUP_FILENAME+".zip")
+    if path.exists(output_folder):
+        rmtree(output_folder)
+    if path.exists(backup_file):
+        remove(backup_file)
+    notes_folder = path.join(output_folder, "notes")
+    makedirs(notes_folder, exist_ok=True)
+    notes = codimd.get_history()
+    with open(path.join(output_folder, "README.md"), "w") as index_file:
+        index_file.write("# Notes")
+        for folder, entries in notes_list().items():
+            index_file.write(f"\n\n## {folder}\n\n")
+            for entry in entries:
+                index_file.write(
+                    f"- [{entry['title']}](notes/{entry['id']}.md)\n")
+    for entry in notes['history']:
+        note_id = entry['id']
+        with open(path.join(notes_folder, note_id+".md"), "wb") as f:
+            f.write(codimd.download_note(note_id))
+    make_archive(backup_file[:-4],
+                 'zip', output_folder)
+    return app.send_static_file(BACKUP_FILENAME+".zip")
 
 
 def main():

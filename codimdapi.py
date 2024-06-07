@@ -68,3 +68,8 @@ class CodimdAPI:
 
     def logout(self):
         self.request("GET", self.url + "logout")
+
+    def download_note(self, note_id):
+        result = self.request(
+            "GET", self.url + note_id + "/download")
+        return result.content

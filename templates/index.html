@@ -1,74 +1,62 @@
 <!DOCTYPE html>
 <html>
-
-<head>
-    <link rel="stylesheet" href="/static/style.css">
-    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
-    <meta charset="utf-8">
+  <head>
+    <link rel="stylesheet" href="/static/style.css" />
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico" />
+    <meta charset="utf-8" />
     <title>ArboriMD</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
 
-
-
-<body onload="pageLoad()">
+  <body onload="pageLoad()">
     <aside id="aside">
-        <header id="title_bar" class="flex">
-            <div id="title">
-                {% include "svg/tree.html" %}
-                <h1 style="display: inline-block">ArboriMD</h1>
-            </div>
-            <div class="control" title="Hide sidebar">
-                {% include 'svg/arrow-bar-left.html' %}
-            </div>
-        </header>
-        <div id="controls-box">
-            <div class="control" id="close_all_btn" title="Fold everything">
-                {% include 'svg/caret-up.html' %}
-            </div>
-            <div class="control" id="open_all_btn" title="Unfold everything">
-                {% include 'svg/caret-down.html' %}
-            </div>
-
-            <div id="copy_link_btn" class="control" title="Add existing note to ArboriMD">
-                {% include 'svg/link.html' %}
-            </div>
-            <div id="create_note_btn" class="control" title="Create a note">
-                {% include 'svg/file-earmark-plus.html' %}
-            </div>
+      <header id="title_bar" class="flex">
+        <div id="title">
+          {% include "svg/tree.html" %}
+          <h1 style="display: inline-block">ArboriMD</h1>
         </div>
-        <div id="add_note_dialog" class="hidden">
-            <h2>Add a note<span class="right" id="hide_note_btn">x</span></h2>
-            <div class="flex column">
-                <!-- Form with no action, only javascript -->
-                <input type="text" id="add_note_url" value="" placeholder="Enter the note URL" />
-                <button type="button" id="add_note_url_btn">Add</button>
-            </div>
+        <div class="control" title="Hide sidebar">{% include 'svg/arrow-bar-left.html' %}</div>
+      </header>
+      <div id="controls-box">
+        <div class="control" id="close_all_btn" title="Fold everything">{% include 'svg/caret-up.html' %}</div>
+        <div class="control" id="open_all_btn" title="Unfold everything">{% include 'svg/caret-down.html' %}</div>
+        <div class="control" id="export_all" title="Export all notes">
+          <a style="color: white" href="{{ url_for('backup') }}">{% include 'svg/cloud-download.html' %}</a>
         </div>
-        <div id="search_box" class="flex">
-            <input type="text" id="search_input" value="" placeholder="Search a note name" />
-            <div id="search_btn" class="control" title="Search a note">
-                {% include 'svg/search.html' %}
-            </div>
+        <div id="copy_link_btn" class="control" title="Add existing note to ArboriMD">
+          {% include 'svg/link.html' %}
         </div>
-        <details id="folder_template">
-            <summary>
-                {% include 'svg/folder.html' %}
-                {% include 'svg/folder-open.html' %}
-                <span class="title"></span>
-            </summary>
-        </details>
-        <li id="note_link_template" class="note-link"><span class="note_title">bla</span><span title="Click to delete note" class="note_delete">x</span></li>
-        <div id="arbolist">
+        <div id="create_note_btn" class="control" title="Create a note">{% include 'svg/file-earmark-plus.html' %}</div>
+      </div>
+      <div id="add_note_dialog" class="hidden">
+        <h2>Add a note<span class="right" id="hide_note_btn">x</span></h2>
+        <div class="flex column">
+          <!-- Form with no action, only javascript -->
+          <input type="text" id="add_note_url" value="" placeholder="Enter the note URL" />
+          <button type="button" id="add_note_url_btn">Add</button>
         </div>
-        <footer><a target="_blank" href="https://github.com/Manvan33/ArboriMD">Made by Manvan</a></footer>
+      </div>
+      <div id="search_box" class="flex">
+        <input type="text" id="search_input" value="" placeholder="Search a note name" />
+        <div id="search_btn" class="control" title="Search a note">{% include 'svg/search.html' %}</div>
+      </div>
+      <details id="folder_template">
+        <summary>
+          {% include 'svg/folder.html' %} {% include 'svg/folder-open.html' %}
+          <span class="title"></span>
+        </summary>
+      </details>
+      <li id="note_link_template" class="note-link">
+        <span class="note_title">bla</span><span title="Click to delete note" class="note_delete">x</span>
+      </li>
+      <div id="arbolist"></div>
+      <footer><a target="_blank" href="https://github.com/Manvan33/ArboriMD">Made by Manvan</a></footer>
     </aside>
     <iframe id="codimd"></iframe>
     <script>
-        let CODIMD_URL = "{{ url }}"
-        let NOTE_TO_OPEN = "{{ note_id }}"
+      let CODIMD_URL = "{{ url }}";
+      let NOTE_TO_OPEN = "{{ note_id }}";
     </script>
     <script src="/static/main.js"></script>
-</body>
-
+  </body>
 </html>

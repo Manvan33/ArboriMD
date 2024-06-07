@@ -2,3 +2,5 @@ __pycache__
 .venv
 .env
 .fleet
+static/downloads
+static/notes_backup.zip
