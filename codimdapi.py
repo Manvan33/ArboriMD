@@ -30,6 +30,7 @@ class CodimdAPI:
                 self.login()
                 return self.request(method, url, follow_redirects=follow_redirects, try_relogin=False)
             # If after relogging in we're still getting an error, something is wrong
+            print("Error requesting", url, result.status_code, result.text)
             return None
         # Return the result if everything is fine
         return result
@@ -50,6 +51,8 @@ class CodimdAPI:
     def get_history(self):
         result = self.request(
             "GET", self.url + "history")
+        if not result:
+            return None
         return result.json()
 
     def refresh_note(self, note_id):
