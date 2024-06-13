@@ -9,39 +9,48 @@ class CodimdAPI:
         self.session = requests.Session()
         if proxy:
             self.session.proxies = {"http": proxy, "https": proxy}
-        self.login()
 
     def login(self):
         self.session.post(self.url + "login", data={
             "email": self.email, "password": self.password}, headers={"Referer": self.url})
 
-    def request(self, method, url, follow_redirects=True, try_relogin=True):
+    def request(self, method, url, return_redirect=False, try_relogin=True):
         """ Make an authenticated request to the server.
 
         method: The HTTP method to use
         url: The URL to request
-        follow_redirects: If we should follow redirects automatically or stop at the first one
+        return_redirect: If we should return the URL we're being redirected to
         try_relogin: If we should try to relogin if we're not logged in
         """
         result = self.session.request(
-            method, url, allow_redirects=follow_redirects)
+            method, url, allow_redirects=False)
+        # If we're not logged in, we might get an error
         if not result.ok:
             if try_relogin:
                 self.login()
-                return self.request(method, url, follow_redirects=follow_redirects, try_relogin=False)
+                return self.request(method, url, return_redirect=return_redirect, try_relogin=False)
             # If after relogging in we're still getting an error, something is wrong
             print("Error requesting", url, result.status_code, result.text)
             return None
+        if result.status_code == 302:
+            if return_redirect:
+                return result
+            elif try_relogin:
+                self.login()
+                return self.request(method, result.next.url, try_relogin=False)
+            else:
+                print("Too many redirects after requesting", url, result.status_code, result.text)
+                return None
         # Return the result if everything is fine
         return result
 
-    def get_redirect_url(self, url, recursive=True):
+    def get_redirect_url(self, url):
         """Get the URL we're being redirected to.
 
         url: The URL to get the redirect URL from
         recursive: If we should try to relogin if we're not logged in
         """
-        result = self.request("GET", url, follow_redirects=False)
+        result = self.request("GET", url, return_redirect=True)
         # We're expecting a 302 redirect, if not return None
         if result.status_code != 302:
             return None
