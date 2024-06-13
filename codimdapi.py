@@ -37,7 +37,7 @@ class CodimdAPI:
                 return result
             elif try_relogin:
                 self.login()
-                return self.request(method, result.next.url, try_relogin=False)
+                return self.request(method, url, try_relogin=False)
             else:
                 print("Too many redirects after requesting", url, result.status_code, result.text)
                 return None
