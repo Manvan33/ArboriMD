@@ -34,6 +34,8 @@ BACKUP_FILE=`python -c 'from main import generate_backup_file; print(generate_ba
 
 # Update the git repository
 git -C $TARGET_FOLDER pull
+# Empty the target folder so notes deleted from the backup are removed as well
+rm -rf $TARGET_FOLDER/*
 # Extract the backup file
 unzip $BACKUP_FILE -d $TARGET_FOLDER
 # Add the extracted files to the git repository
